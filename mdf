@@ -23,6 +23,14 @@ HTML="$OUT_DIR/$BASE.html"
 PDF="$OUT_DIR/$BASE.pdf"
 
 CSS="$HOME/.config/md/qiita.css"
+KATEX="$HOME/.config/md/katex"
+
+# 数式: ローカルKaTeXがあれば使う（オフラインで動く）、なければMathJax(CDN)
+if [ -d "$KATEX" ]; then
+  MATH="--katex=file://$KATEX/"
+else
+  MATH="--mathjax"
+fi
 
 # HTML生成
 if [ ! -f "$HTML" ] || [ "$INPUT" -nt "$HTML" ]; then
@@ -30,7 +38,9 @@ if [ ! -f "$HTML" ] || [ "$INPUT" -nt "$HTML" ]; then
   pandoc "$INPUT" -o "$HTML" \
     --css="$CSS" \
     --standalone \
-    --syntax-highlighting=pygments
+    "$MATH" \
+    --syntax-highlighting=pygments \
+    --metadata pagetitle="$BASE"
 fi
 
 # PDF生成（Chrome）

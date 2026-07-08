@@ -82,7 +82,9 @@ The HTML is stored under a cache directory next to the input file.
 ### Usage
 
 ```bash
-md notes.md
+md notes.md      # convert & open
+md -t notes.md   # with table of contents
+md -w notes.md   # watch mode: regenerate on save, browser auto-reloads
 ```
 
 ### Output
@@ -90,6 +92,16 @@ md notes.md
 - `./.md_cache/notes.html`
 
 The script regenerates HTML only when the Markdown file is newer than the cached HTML.
+
+### Math (offline)
+
+If KaTeX is installed at `~/.config/md/katex/`, TeX math (`$...$`, `$$...$$`) is rendered locally with no network needed. To install:
+
+```bash
+curl -sL https://github.com/KaTeX/KaTeX/releases/latest/download/katex.tar.gz | tar xz -C ~/.config/md/
+```
+
+Without it, the script falls back to MathJax via CDN.
 
 ***
 
