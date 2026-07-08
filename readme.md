@@ -7,6 +7,7 @@ New commands will be added over time.
 ## Contents
 
 - `crun` — compile & run a C file quickly (optionally keep the binary)
+- `cprun` — compile & run a C++ file quickly (optionally keep the binary)
 - `md`   — Markdown → HTML preview (cached) and open in browser
 - `mdf`  — Markdown → PDF (via HTML + headless Chrome) and open the PDF
 
@@ -33,9 +34,9 @@ export PATH="$HOME/bin:$PATH"
 
 ## Requirements
 
-### `crun`
+### `crun` / `cprun`
 
-- `gcc` (or a compatible C compiler)
+- `gcc` for `crun`, `g++` for `cprun`
 
 ### `md` / `mdf`
 
@@ -52,17 +53,18 @@ export PATH="$HOME/bin:$PATH"
 
 ## Commands
 
-## 1) `crun` — compile & run a C file quickly
+## 1) `crun` / `cprun` — compile & run a C / C++ file quickly
 
-Compile and run `NAME.c` by specifying `NAME`.
+`crun` compiles `NAME.c` with `gcc`, `cprun` compiles `NAME.cpp` with `g++`.
 
 ### Usage
 
 ```bash
-crun hello
+crun hello        # or: crun hello.c
+cprun hello       # or: cprun hello.cpp
 ```
 
-- Compiles `hello.c` to `./hello`, runs it, then removes `./hello`.
+- Compiles `hello.c` (or `hello.cpp`) to `./hello`, runs it, then removes `./hello`.
 
 Keep the compiled binary:
 

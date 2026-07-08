@@ -2,10 +2,19 @@
 # description: compile and run a c++ file quickly
 if [ "$1" = "-b" ]; then
     src="$2"
-    file="${src%.cpp}"
-    g++ -o "$file" "$src" && ./"$file"
+    keep=1
 else
     src="$1"
-    file="${src%.cpp}"
+    keep=0
+fi
+
+file="${src%.cpp}"
+if [ "$file" = "$src" ]; then
+    src="$file.cpp"
+fi
+
+if [ "$keep" = 1 ]; then
+    g++ -o "$file" "$src" && ./"$file"
+else
     g++ -o "$file" "$src" && ./"$file" && rm ./"$file"
 fi

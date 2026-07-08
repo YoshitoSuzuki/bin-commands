@@ -2,10 +2,19 @@
 # description: compile and run a C file quickly
 if [ "$1" = "-b" ]; then
     src="$2"
-    file="${src%.cpp}"
-    g++ -o "$file" "$src" && ./"$file"
+    keep=1
 else
     src="$1"
-    file="${src%.cpp}"
-    g++ -o "$file" "$src" && ./"$file" && rm ./"$file"
+    keep=0
+fi
+
+file="${src%.c}"
+if [ "$file" = "$src" ]; then
+    src="$file.c"
+fi
+
+if [ "$keep" = 1 ]; then
+    gcc -o "$file" "$src" && ./"$file"
+else
+    gcc -o "$file" "$src" && ./"$file" && rm ./"$file"
 fi

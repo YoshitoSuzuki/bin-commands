@@ -15,8 +15,8 @@ macOS の `~/bin` に置いて使う自作コマンド集。日常のちょっ�
 |---|---|
 | `md` | Markdown → HTML に変換してブラウザで開く（キャッシュあり）。`-t` で目次、`-w` で監視モード（保存すると自動再生成＆ブラウザ自動リロード） |
 | `mdf` | Markdown → PDF（pandoc で HTML にしてから headless Chrome で印刷）して開く |
-| `crun` | C++ ファイルを g++ でコンパイルして即実行（`-b` でバイナリを残す）。※名前は crun だが中身は cprun と同一の C++ 用。詳細は architecture.md の「既知の問題」参照 |
-| `cprun` | 同上（C++ 用） |
+| `crun` | C ファイルを gcc でコンパイルして即実行（`-b` でバイナリを残す）。`crun hello` でも `crun hello.c` でも可 |
+| `cprun` | C++ 版（g++ + `.cpp`）。使い方は crun と同じ |
 
 ## 関連する場所（リポジトリ外）
 
