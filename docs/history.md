@@ -2,6 +2,16 @@
 
 新しいものを上に。
 
+## 2026-07-10 mdf を md に統合・プレビューの問題修正（ブランチ merge-mdf-into-md）
+
+- mdf を廃止し、`md -p` で PDF 化するように統合。HTML 生成部分がコピペ重複していて片方だけ直し忘れる状態だったのを解消（mdf の usage が `md` になっている等の齟齬も実際にあった）
+- `--embed-resources` を追加。HTML の出力先が `.md_cache/` なので相対パスの画像（`![](img.png)`）が壊れていたのを、画像・CSS・KaTeX ごと HTML に埋め込むことで修正。HTML は1.5MB程度になるが完全自己完結・オフラインで動く
+- PDF 生成に `--virtual-time-budget=8000` を追加。headless Chrome が KaTeX/MathJax の JS 描画を待たずに印刷して数式が欠ける可能性があった
+- 監視モードを file:// の「1.5秒ごと無条件 location.reload()」から、`python3 -m http.server` 配信 + Last-Modified 比較の条件付きリロードに変更（無変更時のチラつき解消）。Ctrl-C でサーバーも trap で終了
+- pandoc 失敗時に古いキャッシュを開いてしまっていたのを exit 1 に修正
+- 複数ファイル指定（`md a.md b.md`）に対応。`-w` は1ファイルのみ、`-w -p` の併用は不可
+- 拡張子の除去を `.md` 固定から任意の拡張子（`.markdown` 等）に変更
+
 ## 2026-07-08 crun のバグ修正（ブランチ fix-crun）
 
 - crun を本来の C 用（gcc + `.c`）に修正。従来は cprun と同一内容（C++ 用）で、`.c` ファイルを渡すとソースが実行ファイルで上書きされて消えるバグがあった

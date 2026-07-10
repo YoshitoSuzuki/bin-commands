@@ -1,6 +1,6 @@
 # build — 新しいマシンでのセットアップ
 
-最終更新: 2026-07-08
+最終更新: 2026-07-10
 
 ビルドは不要（ただの zsh スクリプト集）。新しい Mac で使えるようにする手順。
 
@@ -21,13 +21,14 @@ export PATH="$HOME/bin:$PATH"
 ## 2. 依存ツール
 
 ```zsh
-brew install pandoc        # md / mdf に必要
+brew install pandoc        # md に必要
 xcode-select --install     # crun / cprun の g++ に必要
 ```
 
-- mdf は Google Chrome が `/Applications/Google Chrome.app` にあること前提（パス直書き）
+- `md -p`（PDF化）は Google Chrome が `/Applications/Google Chrome.app` にあること前提（パス直書き）
+- `md -w`（監視モード）は `python3` を使う（ローカルサーバー配信のため）
 
-## 3. CSS テーマを置く（md / mdf に必須）
+## 3. CSS テーマを置く（md に必須）
 
 `~/.config/md/qiita.css` が必要。**このリポジトリには入っていない**ので、旧マシンからコピーする:
 
@@ -50,6 +51,6 @@ curl -sL https://github.com/KaTeX/KaTeX/releases/latest/download/katex.tar.gz | 
 
 ```zsh
 echo '# test\n\n$E = mc^2$' > /tmp/t.md
-md /tmp/t.md    # ブラウザで開き、数式が描画されれば OK
-mdf /tmp/t.md   # PDF が開けば OK
+md /tmp/t.md      # ブラウザで開き、数式が描画されれば OK
+md -p /tmp/t.md   # PDF が開けば OK
 ```

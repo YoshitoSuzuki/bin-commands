@@ -8,8 +8,7 @@ New commands will be added over time.
 
 - `crun` — compile & run a C file quickly (optionally keep the binary)
 - `cprun` — compile & run a C++ file quickly (optionally keep the binary)
-- `md`   — Markdown → HTML preview (cached) and open in browser
-- `mdf`  — Markdown → PDF (via HTML + headless Chrome) and open the PDF
+- `md`   — Markdown → HTML preview (cached) and open in browser, or export PDF with `-p`
 
 ---
 
@@ -38,16 +37,14 @@ export PATH="$HOME/bin:$PATH"
 
 - `gcc` for `crun`, `g++` for `cprun`
 
-### `md` / `mdf`
+### `md`
 
 - `zsh`
 - `pandoc`
-- CSS file for styling (default path used by the scripts):
+- CSS file for styling (default path used by the script):
   - `~/.config/md/qiita.css`
-
-### `mdf` (PDF export)
-
-- Google Chrome (used in headless mode to print HTML to PDF)
+- Google Chrome for `-p` (used in headless mode to print HTML to PDF)
+- `python3` for `-w` (serves the preview for auto-reload)
 
 ***
 
@@ -76,24 +73,30 @@ crun -b hello
 
 ***
 
-## 2) `md` — Markdown to HTML preview (cached)
+## 2) `md` — Markdown to HTML/PDF preview (cached)
 
-Convert a Markdown file to HTML and open it.
-The HTML is stored under a cache directory next to the input file.
+Convert a Markdown file to HTML and open it (or export a PDF with `-p`).
+Outputs are stored under a cache directory next to the input file.
 
 ### Usage
 
 ```bash
-md notes.md      # convert & open
-md -t notes.md   # with table of contents
-md -w notes.md   # watch mode: regenerate on save, browser auto-reloads
+md notes.md         # convert & open in browser
+md -t notes.md      # with table of contents
+md -w notes.md      # watch mode: regenerate on save, browser reloads only on change
+md -p report.md     # export PDF (via headless Chrome) and open it
+md a.md b.md c.md   # multiple files at once
 ```
+
+`-w` takes a single file and cannot be combined with `-p`.
 
 ### Output
 
-- `./.md_cache/notes.html`
+- `./.md_cache/notes.html` (and `./.md_cache/report.pdf` with `-p`)
 
-The script regenerates HTML only when the Markdown file is newer than the cached HTML.
+The generated HTML is fully self-contained: images, CSS and KaTeX are embedded, so it renders correctly from the cache directory and works offline.
+
+The script regenerates outputs only when inputs are newer than cached files (or when options changed since the last run).
 
 ### Math (offline)
 
@@ -107,34 +110,15 @@ Without it, the script falls back to MathJax via CDN.
 
 ***
 
-## 3) `mdf` — Markdown to PDF (via HTML + headless Chrome)
-
-Convert Markdown to HTML (cached), then export PDF using headless Chrome, and open the PDF.
-
-### Usage
-
-```bash
-mdf report.md
-```
-
-### Output
-
-- `./.md_cache/report.html`
-- `./.md_cache/report.pdf`
-
-The script regenerates outputs only when inputs are newer than cached files.
-
-***
-
 ## Customization
 
 ### Markdown CSS theme
 
-By default, the scripts expect:
+By default, the script expects:
 
 - `~/.config/md/qiita.css`
 
-You can change the path inside the scripts or replace the CSS file.
+You can change the path inside the script or replace the CSS file.
 
 ***
 
