@@ -14,19 +14,28 @@ New commands will be added over time.
 
 ## Installation (macOS)
 
-### Clone + symlink into `~/bin` (recommended)
+Clone into `~/bin` and make sure it is on your `PATH` (e.g., in `~/.zshrc`):
 
 ```zsh
-git clone https://github.com/YoshitoSuzuki/bin.git
-cd bin
-
-chmod +x {filenames}
-````
-
-Make sure `~/bin` is on your `PATH` (e.g., in `~/.zshrc`):
-
-```zsh
+git clone https://github.com/YoshitoSuzuki/bin.git ~/bin
 export PATH="$HOME/bin:$PATH"
+```
+
+Everything the scripts need from this repository is bundled (including the CSS theme for `md`), so cloning is enough — plus the external tools below.
+
+### External tools (not in this repository)
+
+```zsh
+brew install pandoc      # md: Markdown conversion
+xcode-select --install   # crun / cprun: C/C++ compilers (also provides python3, used by md -w)
+```
+
+- **Google Chrome** at `/Applications/Google Chrome.app` — used by `md -p` for PDF export
+- **KaTeX** (optional) — offline math rendering for `md`. Without it, math falls back to MathJax via CDN (needs network):
+
+```zsh
+mkdir -p ~/.config/md
+curl -sL https://github.com/KaTeX/KaTeX/releases/latest/download/katex.tar.gz | tar xz -C ~/.config/md/
 ```
 
 ***
@@ -41,10 +50,9 @@ export PATH="$HOME/bin:$PATH"
 
 - `zsh`
 - `pandoc`
-- CSS file for styling (default path used by the script):
-  - `~/.config/md/qiita.css`
 - Google Chrome for `-p` (used in headless mode to print HTML to PDF)
 - `python3` for `-w` (serves the preview for auto-reload)
+- CSS theme is bundled (`assets/qiita.css`); see Customization to override it
 
 ***
 
@@ -114,11 +122,11 @@ Without it, the script falls back to MathJax via CDN.
 
 ### Markdown CSS theme
 
-By default, the script expects:
+`md` uses the bundled `assets/qiita.css` by default. To customize it without touching the repository, put your own CSS at:
 
 - `~/.config/md/qiita.css`
 
-You can change the path inside the script or replace the CSS file.
+If that file exists, it takes precedence over the bundled one.
 
 ***
 

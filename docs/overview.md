@@ -19,6 +19,6 @@ macOS の `~/bin` に置いて使う自作コマンド集。日常のちょっ�
 
 ## 関連する場所（リポジトリ外）
 
-- `~/.config/md/qiita.css` — md が使う CSS テーマ。**このリポジトリには入っていない**ので、新しいマシンでは別途用意が必要（build.md 参照）
-- `~/.config/md/katex/` — 数式のオフライン描画用 KaTeX 一式。なくても動く（CDN の MathJax にフォールバック）
+- `~/.config/md/qiita.css` —（任意）ここに CSS を置くと md が同梱の `assets/qiita.css` より優先して使う。個人カスタマイズ用で、通常は不要
+- `~/.config/md/katex/` — 数式のオフライン描画用 KaTeX 一式（約3MB なのでリポジトリには入れていない）。なくても動く（CDN の MathJax にフォールバック）
 - 生成物は入力ファイルと同じ場所の `.md_cache/` に入る（`notes.md` → `./.md_cache/notes.html`）

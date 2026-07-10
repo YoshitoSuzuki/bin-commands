@@ -28,16 +28,11 @@ xcode-select --install     # crun / cprun の g++ に必要
 - `md -p`（PDF化）は Google Chrome が `/Applications/Google Chrome.app` にあること前提（パス直書き）
 - `md -w`（監視モード）は `python3` を使う（ローカルサーバー配信のため）
 
-## 3. CSS テーマを置く（md に必須）
+## 3. CSS テーマ（何もしなくていい）
 
-`~/.config/md/qiita.css` が必要。**このリポジトリには入っていない**ので、旧マシンからコピーする:
+md の CSS はリポジトリ同梱の `assets/qiita.css` を使うので、clone すればそのまま見た目込みで動く。
 
-```zsh
-mkdir -p ~/.config/md
-scp 旧マシン:~/.config/md/qiita.css ~/.config/md/
-```
-
-これがないと HTML は生成されるが素のスタイルになる。
+見た目をカスタマイズしたい場合だけ、`~/.config/md/qiita.css` に自分の CSS を置く（存在すれば同梱のものより優先される）。
 
 ## 4. KaTeX を置く（数式のオフライン描画、任意）
 

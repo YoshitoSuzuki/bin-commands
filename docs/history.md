@@ -11,6 +11,7 @@
 - pandoc 失敗時に古いキャッシュを開いてしまっていたのを exit 1 に修正
 - 複数ファイル指定（`md a.md b.md`）に対応。`-w` は1ファイルのみ、`-w -p` の併用は不可
 - 拡張子の除去を `.md` 固定から任意の拡張子（`.markdown` 等）に変更
+- CSS テーマをリポジトリに同梱（`assets/qiita.css`）。`~/.config/md/qiita.css` があればそちらを優先（カスタマイズ用）。これで clone + PATH だけで使える。ローカルの `~/.config/md/qiita.css` は同内容を同梱したので削除した。KaTeX は約3MB あるので同梱せず、curl での導入手順を readme / build.md に記載する方針のまま
 
 ## 2026-07-08 crun のバグ修正（ブランチ fix-crun）
 

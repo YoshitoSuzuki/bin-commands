@@ -12,7 +12,7 @@
 
 1. 入力 `foo.md` と同じディレクトリに `.md_cache/` を作る
 2. pandoc で `foo.md` → `.md_cache/foo.html` に変換
-   - CSS: `~/.config/md/qiita.css`
+   - CSS: 同梱の `assets/qiita.css`（`~/.config/md/qiita.css` が存在すればそちらを優先。個人カスタマイズ用）
    - シンタックスハイライト: pygments スタイル
    - 数式: `~/.config/md/katex/` が存在すればローカル KaTeX（`--katex=file://...`）、なければ MathJax（CDN、要ネット）
    - `--embed-resources` で画像・CSS・KaTeX 一式をすべて HTML に埋め込む（data URI 化）。HTML が `.md_cache/` に置かれても相対パスの画像が壊れないため。1ファイル 1.5MB 程度になるがプレビュー用キャッシュなので許容。`--resource-path` で画像は入力 md のディレクトリ基準に解決される（どこから実行しても効く）

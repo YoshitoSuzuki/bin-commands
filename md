@@ -36,7 +36,11 @@ if [ $WATCH -eq 1 ] && [ $# -gt 1 ]; then
   exit 1
 fi
 
+# CSS: ~/.config/md/qiita.css があればそれを優先（個人カスタマイズ用）、なければ同梱のもの
 CSS="$HOME/.config/md/qiita.css"
+if [ ! -f "$CSS" ]; then
+  CSS="${0:A:h}/assets/qiita.css"
+fi
 KATEX="$HOME/.config/md/katex"
 CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
