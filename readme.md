@@ -9,6 +9,7 @@ New commands will be added over time.
 - `crun` — compile & run a C file quickly (optionally keep the binary)
 - `cprun` — compile & run a C++ file quickly (optionally keep the binary)
 - `md`   — Markdown → HTML preview (cached) and open in browser, or export PDF with `-p`
+- `ch` — open files/URLs in Google Chrome (instead of the default browser)
 
 ---
 
