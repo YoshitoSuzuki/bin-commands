@@ -48,4 +48,5 @@ curl -sL https://github.com/KaTeX/KaTeX/releases/latest/download/katex.tar.gz | 
 echo '# test\n\n$E = mc^2$' > /tmp/t.md
 md /tmp/t.md      # ブラウザで開き、数式が描画されれば OK
 md -p /tmp/t.md   # PDF が開けば OK
+md -H /tmp/t.md   # 単体 HTML のパスが出れば OK
 ```

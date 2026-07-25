@@ -2,21 +2,24 @@
 # description: Markdown to HTML/PDF preview (cached)
 
 usage() {
-  echo "Usage: md [-w] [-t] [-p] <file.md> ..."
+  echo "Usage: md [-w] [-t] [-p|-H] <file.md> ..."
   echo "  -w  watch mode (auto-regenerate & reload)"
   echo "  -t  add table of contents"
   echo "  -p  open as PDF (headless Chrome) instead of HTML"
+  echo "  -H  export a self-contained HTML (print its path, do not open)"
   exit 1
 }
 
 WATCH=0
 PDF=0
+EXPORT=0
 TOC=()
-while getopts "wtp" opt; do
+while getopts "wtpH" opt; do
   case $opt in
     w) WATCH=1 ;;
     t) TOC=(--toc --toc-depth=3) ;;
     p) PDF=1 ;;
+    H) EXPORT=1 ;;
     *) usage ;;
   esac
 done
@@ -28,6 +31,16 @@ fi
 
 if [ $WATCH -eq 1 ] && [ $PDF -eq 1 ]; then
   echo "-w and -p cannot be combined" >&2
+  exit 1
+fi
+
+if [ $WATCH -eq 1 ] && [ $EXPORT -eq 1 ]; then
+  echo "-w and -H cannot be combined" >&2
+  exit 1
+fi
+
+if [ $PDF -eq 1 ] && [ $EXPORT -eq 1 ]; then
+  echo "-p and -H cannot be combined" >&2
   exit 1
 fi
 
@@ -49,6 +62,10 @@ if [ -d "$KATEX" ]; then
   MATH="--katex=file://$KATEX/"
 else
   MATH="--mathjax"
+  # MathJax はCDN読み込みなので、埋め込めない＝アップロード先で回線が必要になる
+  if [ $EXPORT -eq 1 ]; then
+    echo "warning: KaTeX not found at $KATEX, falling back to MathJax (CDN): math needs network" >&2
+  fi
 fi
 
 gen() {
@@ -115,7 +132,7 @@ EOF
 
   # HTML生成
   if [ ! -f "$HTML" ] || [ "$INPUT" -nt "$HTML" ] || [ "$(cat "$OPTS_FILE" 2>/dev/null)" != "$OPTS" ]; then
-    echo "Generating HTML..."
+    echo "Generating HTML..." >&2
     if ! gen; then
       echo "pandoc failed: $INPUT" >&2
       exit 1
@@ -123,7 +140,10 @@ EOF
     echo "$OPTS" > "$OPTS_FILE"
   fi
 
-  if [ $PDF -eq 1 ]; then
+  if [ $EXPORT -eq 1 ]; then
+    # 生成物はそのまま1枚で完結しているので、パスだけ出す（scp などにそのまま渡せる）
+    echo "${HTML:A}"
+  elif [ $PDF -eq 1 ]; then
     # PDF生成（Chrome）。virtual-time-budgetでKaTeX/MathJaxの描画完了を待つ
     if [ ! -x "$CHROME" ]; then
       echo "Google Chrome not found: $CHROME" >&2

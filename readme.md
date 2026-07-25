@@ -8,7 +8,7 @@ New commands will be added over time.
 
 - `crun` — compile & run a C file quickly (optionally keep the binary)
 - `cprun` — compile & run a C++ file quickly (optionally keep the binary)
-- `md`   — Markdown → HTML preview (cached) and open in browser, or export PDF with `-p`
+- `md`   — Markdown → HTML preview (cached) and open in browser, or export a PDF with `-p` / a standalone HTML with `-H`
 - `ch` — open files/URLs in Google Chrome (instead of the default browser)
 
 ---
@@ -94,16 +94,27 @@ md notes.md         # convert & open in browser
 md -t notes.md      # with table of contents
 md -w notes.md      # watch mode: regenerate on save, browser reloads only on change
 md -p report.md     # export PDF (via headless Chrome) and open it
+md -H notes.md      # export a standalone HTML and print its path (no browser)
 md a.md b.md c.md   # multiple files at once
 ```
 
-`-w` takes a single file and cannot be combined with `-p`.
+`-w` takes a single file. `-w`, `-p` and `-H` cannot be combined with each other.
 
 ### Output
 
 - `./.md_cache/notes.html` (and `./.md_cache/report.pdf` with `-p`)
 
-The generated HTML is fully self-contained: images, CSS and KaTeX are embedded, so it renders correctly from the cache directory and works offline.
+The generated HTML is fully self-contained: images, CSS and KaTeX (fonts included) are embedded as data URIs, so it has **zero external references**. It renders correctly from the cache directory, works offline, and looks exactly the same when served over HTTP.
+
+### Publishing on the web (`-H`)
+
+`-H` writes that self-contained HTML and prints its absolute path instead of opening a browser, so you can upload the single file as-is:
+
+```bash
+scp "$(md -H notes.md)" server:/var/www/html/notes.html
+```
+
+Progress messages go to stderr, so the path is safe to use in a command substitution. If KaTeX is not installed, math falls back to MathJax via CDN — the file is then no longer self-contained, and `-H` warns about it.
 
 The script regenerates outputs only when inputs are newer than cached files (or when options changed since the last run).
 
