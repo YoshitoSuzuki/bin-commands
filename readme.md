@@ -8,7 +8,7 @@ New commands will be added over time.
 
 - `crun` — compile & run a C file quickly (optionally keep the binary)
 - `cprun` — compile & run a C++ file quickly (optionally keep the binary)
-- `md`   — Markdown → HTML preview (cached) and open in browser, or export a PDF with `-p` / a standalone HTML with `-H`
+- `md`   — Markdown → HTML preview (cached under `~/.cache/md`) and open in browser, or export a PDF with `-p` / a standalone HTML with `-H` into the current directory
 - `ch` — open files/URLs in Google Chrome (instead of the default browser)
 
 ---
@@ -93,8 +93,8 @@ Outputs are stored under a cache directory next to the input file.
 md notes.md         # convert & open in browser
 md -t notes.md      # with table of contents
 md -w notes.md      # watch mode: regenerate on save, browser reloads only on change
-md -p report.md     # export PDF (via headless Chrome) and open it
-md -H notes.md      # export a standalone HTML and print its path (no browser)
+md -p report.md     # write ./report.pdf (via headless Chrome) and open it
+md -H notes.md      # write ./notes.html (standalone) and print its path (no browser)
 md a.md b.md c.md   # multiple files at once
 ```
 
@@ -102,13 +102,16 @@ md a.md b.md c.md   # multiple files at once
 
 ### Output
 
-- `./.md_cache/notes.html` (and `./.md_cache/report.pdf` with `-p`)
+- Preview HTML (cache): `~/.cache/md/<name>-<hash>/<name>.html` — never written next to your Markdown, so working directories stay clean. The hash is derived from the input file's absolute path, so same-named files in different directories get their own cache.
+- Explicit exports go to the **current directory**: `./notes.html` with `-H`, `./report.pdf` with `-p`.
 
 The generated HTML is fully self-contained: images, CSS and KaTeX (fonts included) are embedded as data URIs, so it has **zero external references**. It renders correctly from the cache directory, works offline, and looks exactly the same when served over HTTP.
 
+Cached previews can be discarded at any time (`rm -rf ~/.cache/md`); they are regenerated on the next run.
+
 ### Publishing on the web (`-H`)
 
-`-H` writes that self-contained HTML and prints its absolute path instead of opening a browser, so you can upload the single file as-is:
+`-H` writes that self-contained HTML into the current directory and prints its absolute path instead of opening a browser, so you can upload the single file as-is:
 
 ```bash
 scp "$(md -H notes.md)" server:/var/www/html/notes.html

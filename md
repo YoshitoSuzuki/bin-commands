@@ -5,8 +5,8 @@ usage() {
   echo "Usage: md [-w] [-t] [-p|-H] <file.md> ..."
   echo "  -w  watch mode (auto-regenerate & reload)"
   echo "  -t  add table of contents"
-  echo "  -p  open as PDF (headless Chrome) instead of HTML"
-  echo "  -H  export a self-contained HTML (print its path, do not open)"
+  echo "  -p  write a PDF (headless Chrome) into the current directory and open it"
+  echo "  -H  write a self-contained HTML into the current directory (print its path, do not open)"
   exit 1
 }
 
@@ -56,6 +56,7 @@ if [ ! -f "$CSS" ]; then
 fi
 KATEX="$HOME/.config/md/katex"
 CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+CACHE_ROOT="${XDG_CACHE_HOME:-$HOME/.cache}/md"
 
 # 数式: ローカルKaTeXがあれば使う（オフラインで動く）、なければMathJax(CDN)
 if [ -d "$KATEX" ]; then
@@ -86,11 +87,17 @@ for INPUT in "$@"; do
     exit 1
   fi
 
-  DIR=$(dirname "$INPUT")
+  ABS="${INPUT:A}"
+  DIR="${ABS:h}"
   BASE="${$(basename "$INPUT")%.*}"
 
-  OUT_DIR="$DIR/.md_cache"
+  # キャッシュは入力の隣ではなく ~/.cache/md/ にまとめる（作業ディレクトリを汚さない）。
+  # 別ディレクトリの同名ファイルとぶつからないよう、絶対パスのハッシュでディレクトリを分ける
+  KEY=$(printf '%s' "$ABS" | shasum | cut -c1-10)
+  OUT_DIR="$CACHE_ROOT/$BASE-$KEY"
   mkdir -p "$OUT_DIR"
+  # どの md のキャッシュかを後から辿れるようにしておく
+  printf '%s\n' "$ABS" > "$OUT_DIR/.source"
 
   HTML="$OUT_DIR/$BASE.html"
 
@@ -141,15 +148,18 @@ EOF
   fi
 
   if [ $EXPORT -eq 1 ]; then
-    # 生成物はそのまま1枚で完結しているので、パスだけ出す（scp などにそのまま渡せる）
-    echo "${HTML:A}"
+    # 書き出しは実行したディレクトリに置く。生成物はそのまま1枚で完結しているので、
+    # パスだけ出す（scp などにそのまま渡せる）
+    HTML_OUT="$PWD/$BASE.html"
+    cp "$HTML" "$HTML_OUT" || exit 1
+    echo "$HTML_OUT"
   elif [ $PDF -eq 1 ]; then
     # PDF生成（Chrome）。virtual-time-budgetでKaTeX/MathJaxの描画完了を待つ
     if [ ! -x "$CHROME" ]; then
       echo "Google Chrome not found: $CHROME" >&2
       exit 1
     fi
-    PDF_OUT="$OUT_DIR/$BASE.pdf"
+    PDF_OUT="$PWD/$BASE.pdf"
     if [ ! -f "$PDF_OUT" ] || [ "$HTML" -nt "$PDF_OUT" ]; then
       echo "Generating PDF (Chrome)..."
       "$CHROME" \

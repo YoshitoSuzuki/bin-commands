@@ -1,6 +1,6 @@
 # architecture — 各コマンドの仕組み
 
-最終更新: 2026-07-25
+最終更新: 2026-08-10
 
 すべて zsh スクリプト。1コマンド = 1ファイルで、ファイル名がそのままコマンド名。
 
@@ -10,24 +10,28 @@
 
 処理の流れ:
 
-1. 入力 `foo.md` と同じディレクトリに `.md_cache/` を作る
-2. pandoc で `foo.md` → `.md_cache/foo.html` に変換
+1. 入力 `foo.md` 専用のキャッシュディレクトリ `~/.cache/md/foo-<hash>/` を作る（`$XDG_CACHE_HOME` があればそちら）
+2. pandoc で `foo.md` → `~/.cache/md/foo-<hash>/foo.html` に変換
    - CSS: 同梱の `assets/qiita.css`（`~/.config/md/qiita.css` が存在すればそちらを優先。個人カスタマイズ用）
    - シンタックスハイライト: pygments スタイル
    - 数式: `~/.config/md/katex/` が存在すればローカル KaTeX（`--katex=file://...`）、なければ MathJax（CDN、要ネット）
-   - `--embed-resources` で画像・CSS・KaTeX 一式をすべて HTML に埋め込む（data URI 化）。HTML が `.md_cache/` に置かれても相対パスの画像が壊れないため。1ファイル 1.5MB 程度になるがプレビュー用キャッシュなので許容。`--resource-path` で画像は入力 md のディレクトリ基準に解決される（どこから実行しても効く）
+   - `--embed-resources` で画像・CSS・KaTeX 一式をすべて HTML に埋め込む（data URI 化）。HTML が入力とは別の場所に置かれても相対パスの画像が壊れないため。1ファイル 1.5MB 程度になるがプレビュー用キャッシュなので許容。`--resource-path` で画像は入力 md のディレクトリ基準に解決される（どこから実行しても効く）
 3. `open` でデフォルトブラウザで開く（`-p` のときは PDF を開く）
 
 複数ファイルをまとめて渡せる（`md a.md b.md`）。ただし `-w` は1ファイルのみ、`-w` `-p` `-H` は互いに併用不可。pandoc が失敗したときは古いキャッシュを開かず exit 1 する。
 
-キャッシュ: HTML より Markdown が新しいとき、または**前回とオプションが違うとき**に再生成する。前回のオプションは `.md_cache/.<名前>.opts` に記録してあり、`md foo.md` → `md -t foo.md` のような打ち直しでもちゃんと反映される。
+キャッシュの置き場所（2026-08-10 変更）: 以前は入力の隣に `.md_cache/` を作っていたが、md を置いてあるディレクトリが軒並み汚れるので `~/.cache/md/` に集約した。ディレクトリ名は `<ファイル名>-<入力の絶対パスの sha1 先頭10桁>`。**別ディレクトリの同名ファイル**（`a/note.md` と `b/note.md`）はハッシュが変わるので衝突しない。名前の方はどのファイルのキャッシュか目で見てわかるようにするため付けてあり、さらに中に `.source`（入力の絶対パス）を書き出している。中身は消しても次回作り直されるだけなので `rm -rf ~/.cache/md` してよい。1ファイル1ディレクトリにしているのは、`-w` の `python3 -m http.server` がそのディレクトリを丸ごと配信するため（他の md のキャッシュを一緒に配ってしまわないように）。
+
+書き出し（`-p` / `-H`）はキャッシュではなく**実行したディレクトリ**（`$PWD`）に `<名前>.pdf` / `<名前>.html` を作る。プレビュー＝手元に残らないキャッシュ、書き出し＝自分で管理する成果物、という切り分け。
+
+キャッシュ: HTML より Markdown が新しいとき、または**前回とオプションが違うとき**に再生成する。前回のオプションはキャッシュディレクトリ内の `.<名前>.opts` に記録してあり、`md foo.md` → `md -t foo.md` のような打ち直しでもちゃんと反映される。
 
 オプション:
 
 - `-t` — pandoc の `--toc --toc-depth=3` を付けて目次を生成。pandoc は目次を本文の先頭（タイトルの上）に置くので、埋め込んだ JS で最初の `<h1>` の直後に移動している
-- `-w` — 監視モード。1秒ごとに mtime を見て、更新されていたら再生成。`python3 -m http.server`（ポートは HTML の絶対パスの cksum から 49152〜59151 に決まる）で `.md_cache/` を配信し、ブラウザはその URL を開く。HTML 側には `.md_cache/.reload.html` 経由で「1秒ごとに自分の Last-Modified を HEAD で見て、変わったときだけ location.reload() する `<script>`」を埋め込む（無変更時にリロードしないのでチラつかない。`fetch` が必要なので file:// ではなくサーバー配信にしている）。Ctrl-C で終了するとサーバーも trap で落ちる
-- `-H` — 単体 HTML の書き出し（Web サーバーにアップロードする用）。生成物は普段のプレビューと同じ `.md_cache/<名前>.html` で、`--embed-resources` により CSS・KaTeX（フォント込み）・画像がすべて data URI で入っているため**外部参照ゼロの1ファイル**になっている。そのままサーバーに置けば `md` で開いたときと同じ見た目になる（file:// と http:// で headless Chrome のスクショが1バイト差なく一致することを確認済み）。ブラウザは開かず、標準出力にはパスだけを出す（`scp $(md -H foo.md) server:` のように使えるよう、"Generating HTML..." 等の進捗は stderr に出している）。KaTeX がなく MathJax（CDN）にフォールバックしている場合は「アップロード先で回線が必要」と警告する。監視モードのリロード用 `<script>` はオプション違いでキャッシュが再生成されるため書き出しには混入しない
-- `-p` — PDF 化（旧 mdf）。headless Chrome（`/Applications/Google Chrome.app/...` を直接パス指定）で `--print-to-pdf` する。`--virtual-time-budget=8000` で KaTeX/MathJax の JS 描画完了を待ってから印刷するので、数式が未描画のまま PDF になることはない。PDF もキャッシュ式（HTML が PDF より新しいときだけ再生成）
+- `-w` — 監視モード。1秒ごとに mtime を見て、更新されていたら再生成。`python3 -m http.server`（ポートは HTML の絶対パスの cksum から 49152〜59151 に決まる）でキャッシュディレクトリを配信し、ブラウザはその URL を開く。HTML 側にはキャッシュ内の `.reload.html` 経由で「1秒ごとに自分の Last-Modified を HEAD で見て、変わったときだけ location.reload() する `<script>`」を埋め込む（無変更時にリロードしないのでチラつかない。`fetch` が必要なので file:// ではなくサーバー配信にしている）。Ctrl-C で終了するとサーバーも trap で落ちる
+- `-H` — 単体 HTML の書き出し（Web サーバーにアップロードする用）。中身は普段のプレビューと同じキャッシュ HTML をコピーしたもので、`--embed-resources` により CSS・KaTeX（フォント込み）・画像がすべて data URI で入っているため**外部参照ゼロの1ファイル**になっている。そのままサーバーに置けば `md` で開いたときと同じ見た目になる（file:// と http:// で headless Chrome のスクショが1バイト差なく一致することを確認済み）。ブラウザは開かず、標準出力にはパスだけを出す（`scp $(md -H foo.md) server:` のように使えるよう、"Generating HTML..." 等の進捗は stderr に出している）。KaTeX がなく MathJax（CDN）にフォールバックしている場合は「アップロード先で回線が必要」と警告する。監視モードのリロード用 `<script>` はオプション違いでキャッシュが再生成されるため書き出しには混入しない
+- `-p` — PDF 化（旧 mdf）。headless Chrome（`/Applications/Google Chrome.app/...` を直接パス指定）で `--print-to-pdf` する。`--virtual-time-budget=8000` で KaTeX/MathJax の JS 描画完了を待ってから印刷するので、数式が未描画のまま PDF になることはない。PDF は実行したディレクトリに置き、HTML がその PDF より新しいときだけ作り直す
 
 ## 数式サポート（2026-07-08 追加）
 
