@@ -22,6 +22,8 @@ git clone https://github.com/YoshitoSuzuki/bin.git ~/bin
 export PATH="$HOME/bin:$PATH"
 ```
 
+Or let [dotfiles](https://github.com/YoshitoSuzuki/dotfiles) do it: its `install.sh` clones this repository into `~/bin` as a module and runs `install.sh` here, which only reports missing external tools.
+
 Everything the scripts need from this repository is bundled (including the CSS theme for `md`), so cloning is enough — plus the external tools below.
 
 ### External tools (not in this repository)
